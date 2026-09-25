@@ -14,5 +14,22 @@ services:
         soft: 65536
         hard: 65536
 
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      # local model cache persists across container restarts — bge-base +
+      # bge-reranker-base are a few hundred MB, no reason to re-download
+      # every `docker compose up`
+      - hf_cache:/root/.cache/huggingface
+    depends_on:
+      - qdrant
+
 volumes:
   qdrant_storage:
+  hf_cache:
