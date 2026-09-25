@@ -187,7 +187,7 @@ edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than gloss
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install torch --index-url https://download.pytorch.org/whl/cpu  # CPU-only, avoids ~1.5GB of unneeded CUDA packages
+pip install torch --extra-index-url https://download.pytorch.org/whl/cpu  # CPU-only, avoids ~1.5GB of unneeded CUDA packages
 pip install -r requirements.txt
 
 docker compose up -d   # starts Qdrant on :6333
