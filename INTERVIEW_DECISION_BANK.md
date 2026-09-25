@@ -80,6 +80,6 @@
 
 ## Research Copilot — UI Architecture (ADR-008)
 **Chosen:** FastAPI backend + static HTML/JS frontend (no build step) as a walking skeleton
-**Rejected:** React/Next.js (CLAUDE.md's originally suggested stack, deferred as an explicit later layer), Streamlit/Gradio
+**Rejected:** React/Next.js (originally suggested stack, deferred as an explicit later layer), Streamlit/Gradio
 **One-line why:** same incremental-build logic applied to every other component this session — prove the API contract works end-to-end before adding a second new toolchain (Node/React) on top of it; Streamlit/Gradio were rejected as the weakest portfolio signal, demonstrating neither API design nor frontend engineering.
 **"When would you use X instead?" answer:** React/Next.js once the API-first version is proven stable and the portfolio value of demonstrating frontend framework skill outweighs the added setup time. Streamlit/Gradio for the fastest possible internal demo where portfolio signal doesn't matter.

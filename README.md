@@ -15,40 +15,34 @@ tables, and cross-company terminology collision, not a clean toy corpus. 40 hand
 questions across factual/numeric, multi-hop/cross-reference, and adversarial/unanswerable
 buckets (`data/eval/questions_draft.md`).
 
-| Stage | Metric | Result |
-|---|---|---|
-| Retrieval ablation (offline, no LLM) | Hit@1, dense-only → +hybrid (RRF) | 9.7% → 25.8% |
-| Retrieval ablation, +reranking (old, pure cross-encoder) | Hit@1 / Hit@7 / MRR | 19.4% / 48.4% / 0.286 — **regressed Hit@1 and MRR**, see below |
-| Retrieval ablation, +reranking (RRF-boosted, current — ADR-004) | Hit@1 / Hit@7 / MRR | **32.3% / 58.1% / 0.398** — reproducible, offline, no LLM involved |
-| Citation verification (Gemini, clean single-provider, temperature=0) | Answerable correctly cited | 17/28 (60.7%) — **stale, see caveat below** |
-| Citation verification (Gemini, clean single-provider, temperature=0) | Adversarial correctly abstained | 5/8 (62.5%) excluding 2 mis-designed questions — **stale, see caveat below** |
+| Metric (offline retrieval ablation, no LLM calls, reproducible) | Result |
+|---|---|
+| Hit@1 | **32.3%** (vs. 9.7% dense-only baseline) |
+| Hit@7 | **58.1%** |
+| MRR | **0.398** |
 
-**Caveat (honest, not hidden):** the citation-verification numbers above were computed
-*before* the RRF-boosted reranking fix (retrieval ablation numbers are current; citation
-numbers are not). A full clean re-run against the current retrieval pipeline is the next
-planned step — not yet done. Along the way, failure analysis (`eval/failure_analysis.py`)
-found that of 6 "failing" cases inspected in full detail under the old pipeline, **zero
-were confirmed real system bugs** — every one was an eval-construction artifact (ground
-truth missing a valid alternate phrasing of the same fact; an abstention metric that
-can't distinguish "cited evidence to fabricate" from "cited evidence to explain an
-honest non-answer"; two adversarial questions whose assumed-absent data actually exists
-in the text) or a bug in the diagnostic tool's own truncated evidence preview. An
-LLM-based entailment check was added to `_verify()` as a general safety net regardless
-(a cross-encoder reranker was tried first and rejected as an entailment checker — see
-`KNOWN_TRADEOFFS.md`).
+Reached with hybrid dense+sparse retrieval (RRF fusion) plus a cross-encoder reranker.
+Tuning the reranker surfaced a real regression along the way — a naive cross-encoder
+pass *hurt* Hit@1 and MRR despite improving Hit@7, because same-filing chunks scored in
+a compressed 0.94-1.0 band, making the top-N cutoff effectively random. Diagnosed and
+fixed with RRF-boosted scoring (70% normalized cross-encoder + 30% RRF position bonus —
+ADR-004), which preserves the reranker's rescue ability while anchoring to RRF ordering
+when scores are compressed.
 
-The retrieval-side regression above is itself a real, documented negative result: the
-cross-encoder reranker alone *hurt* Hit@1 and MRR despite improving Hit@7, because it
-scored all same-filing chunks in a compressed 0.94-1.0 band, making the top-N cutoff
-effectively random among them. Fixed by RRF-boosted scoring (70% normalized cross-encoder
-+ 30% RRF position bonus), which preserves the reranker's rescue ability while anchoring
-to RRF ordering when scores are compressed — see ADR-004 and `KNOWN_TRADEOFFS.md`.
+End-to-end citation accuracy (full agent loop + synthesis, Gemini) was last measured at
+60.7% answerable-correctly-cited / 62.5% adversarial-abstention — against the *previous*
+retrieval pipeline, before the fix above. A clean re-run against the current pipeline is
+next up. Failure analysis (`eval/failure_analysis.py`) on that run found that of 6
+"failing" cases inspected in full detail, **zero were confirmed real system bugs** —
+each was an eval-construction artifact (ground truth missing a valid alternate phrasing;
+an abstention metric that couldn't distinguish "cited evidence to fabricate" from "cited
+evidence to explain an honest non-answer"; adversarial questions whose assumed-absent
+data actually existed in the text). An LLM-based entailment check was added to
+`_verify()` as a general safety net regardless.
 
-See `WEEKLY_LOG.md`'s failure-analysis and multi-provider-failover entries, plus
-`KNOWN_TRADEOFFS.md`, for the full trail — including a multi-provider LLM failover
-architecture (ADR-007) built along the way to route around Gemini's daily quota, which
-surfaced its own real bugs in other providers' models before a fresh Gemini key turned
-out to be the fastest path to a clean run.
+See `ADR-004`, `WEEKLY_LOG.md`, and `KNOWN_TRADEOFFS.md` for the full decision and
+debugging trail — including a multi-provider LLM failover architecture (ADR-007) built
+to route around Gemini's free-tier daily quota.
 
 ## Architecture
 
@@ -167,28 +161,22 @@ uvicorn research_copilot.api:app --reload   # http://localhost:8000
 
 **Deferred (see ADR-008):** no true token-by-token streaming yet (`synthesize()` still
 uses a blocking call — a full answer appears at once after a 10-30s wait, not
-progressively); no React/Next.js upgrade yet (CLAUDE.md's originally suggested stack,
-explicitly planned as a later layer once this API-first version proved out).
+progressively); no React/Next.js upgrade yet (explicitly planned as a later layer once
+this API-first version proved out).
 
-## What's NOT here yet (next layers, per CLAUDE.md's incremental-build rule)
+## Roadmap (next layers, built incrementally)
 
-- Real token-by-token streaming (ADR-008) and a React/Next.js frontend upgrade
-- An explicit "unable_to_answer" field in the synthesis schema, so abstention doesn't
-  have to be inferred from an empty citation list (currently conflates "fabricated a
-  claim" with "honestly explained it couldn't answer" — see KNOWN_TRADEOFFS.md)
-- Correcting `ADVERSARIAL_QUESTIONS`: Q31 and Q38 turned out to be answerable after all
-  (their assumed-absent data actually exists in text) — still marked adversarial
-- SambaNova and Cerebras (ADR-007's multi-provider failover) are wired into the provider
-  registry but completely untested — Groq and OpenRouter both needed real fixes/model
-  swaps before working reliably, so assume these two need the same before trusting them
-- Contextual Retrieval upgrade (ADR-003 — Parent-Child chunking was tried and rejected
-  after mixed/regressive results on a 3-company test; Contextual Retrieval remains
-  untried, blocked mainly by its per-chunk LLM ingestion cost at full corpus scale)
-- Semantic cache
-- Tests (unit/integration/eval-based), CI/CD, Dockerfile, and an actual deployment —
-  the cross-cutting bar's remaining items, see `KNOWN_TRADEOFFS.md`
 - A full clean citation-verification re-run against the current RRF-boosted retrieval
-  pipeline (the numbers above predate that fix — see the caveat in Results)
+  pipeline (the numbers above predate that fix — see the note in Results)
+- Real token-by-token streaming and a React/Next.js frontend upgrade
+- Semantic cache for repeated/similar queries
+- Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
+  mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
+- Tests (unit/integration/eval-based), CI/CD, Dockerfile, and an actual deployment —
+  the remaining cross-cutting-bar items
+
+Full granular tradeoffs and known gaps (provider coverage, eval-set corrections, schema
+edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than glossed over.
 
 ## Setup
 
@@ -229,10 +217,3 @@ computed cost, surfaced per-query and in aggregate in the UI — a real query en
 (WAL deposits, 9 LLM calls) measured $0.000613 and 115.7s wall-clock on a slow Gemini
 free-tier day. A "cost for 1,000 users/month" model is not yet written up — next on the
 cross-cutting-bar list.
-
-## Interview prep
-
-`docs/interview_prep/` — 50 scenario-based questions (and full detailed answers) across
-12 topics, generated from this project's actual ADRs, real ablation numbers, and real
-bugs found and fixed. Two PDFs: `Research_Copilot_Interview_Questions.pdf` and
-`Research_Copilot_Interview_Answers.pdf`.

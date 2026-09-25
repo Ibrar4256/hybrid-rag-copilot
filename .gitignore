@@ -5,3 +5,5 @@ __pycache__/
 data/eval/baseline_*.json
 .claude/
 data/telemetry/
+CLAUDE.md
+docs/interview_prep/

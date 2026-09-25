@@ -264,8 +264,9 @@ one corpus. Different corpora with more diverse topics (less score compression) 
 from different weights or even reverting to pure reranker ordering. The constants are in
 `query.py` at the top of the file.
 
-## No cost/latency logging
-Every LLM/embedding call should eventually log tokens, cost, and latency per CLAUDE.md's
-cross-cutting bar. Not implemented yet — there's no LLM call in the pipeline at all yet
-(see "No LLM synthesis" above), so there's nothing to log besides local model inference
-time, which hasn't been instrumented either.
+## RESOLVED (2026-09): No cost/latency logging — fixed with per-call telemetry (ADR-009)
+Every LLM/embedding call is now logged to `data/telemetry/calls.jsonl` (provider, model,
+tokens in/out, latency, computed cost) via `telemetry.py`, wired into all 9 call sites
+(Gemini native SDK, OpenAI-compatible failover providers, local embedding/reranker
+calls). Surfaced per-query and in aggregate in the UI. A "cost for 1,000 users/month"
+writeup is still open — see the README's Roadmap.
