@@ -27,8 +27,9 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
   28 hand-verified questions on one corpus type (table-heavy bank 10-Ks). Likely corpus-
   dependent, not a universal constant.
 - **No BM25 IDF validation at scale.** `BM25SparseProvider` uses fastembed's default
-  model as-is; sparse relevance quality hasn't been sanity-checked against a larger, more
-  realistic corpus.
+  model as-is; IDF statistics are computed over the current 18-filing corpus, and sparse
+  relevance quality hasn't been sanity-checked against a meaningfully larger corpus
+  (100s+ documents).
 
 ## Citation accuracy & eval methodology
 
@@ -55,10 +56,6 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
   against 38 hand-verified questions, but doesn't compute RAGAS's faithfulness/context-
   precision scores specifically, and 38 questions is on the low end of the ~30-50
   question range originally scoped.
-- **Explicit `unable_to_answer` field still missing** from the synthesis schema —
-  abstention is currently inferred from an empty citation list, which conflates
-  "fabricated a claim" with "honestly explained it couldn't answer."
-
 ## Infrastructure & operations
 
 - **Gemini's daily quota (not just per-minute) is a hard constraint** that client-side
@@ -88,6 +85,12 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
 
 ## Resolved
 
+- **Explicit `unable_to_answer` field** — the synthesis schema now returns
+  `{"unable_to_answer": bool, "claims": [...]}` instead of inferring abstention from an
+  empty citation list (ADR-006 addendum), so an honest hedge and a fabrication that
+  happened to get caught are no longer scored identically. Tightened
+  `citation_verification.py`'s `correctly_abstained` metric accordingly — may lower the
+  *measured* adversarial number without any change in actual system behavior.
 - **Cost/latency logging** — every LLM/embedding call is now logged to
   `data/telemetry/calls.jsonl` (provider, model, tokens in/out, latency, computed cost)
   via `telemetry.py`, wired into all 9 call sites, surfaced per-query and in aggregate in
