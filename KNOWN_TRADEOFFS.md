@@ -33,24 +33,35 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
 
 ## Citation accuracy & eval methodology
 
-- **Headline numbers (60.7% answerable / 62.5% adversarial, excluding 2 corrected
-  questions) likely undercount real accuracy.** Failure analysis on 6 "failing" cases
-  found zero confirmed system bugs — every one was an eval-construction artifact (ground
-  truth missing a valid alternate phrasing of the same fact; an abstention metric that
-  can't distinguish "cited evidence to fabricate" from "cited evidence to explain an
-  honest non-answer"; a truncated preview in the diagnostic tool itself hiding the
-  supporting text) or genuinely ambiguous source data. An LLM-based entailment check was
-  added to `_verify()` as a general safety net regardless — a cross-encoder reranker was
-  tried first for this and rejected (it measures topical relevance, not entailment; a
-  confirmed-bad and a confirmed-good citation both scored 0.97+).
-- **These numbers predate the RRF-boosted reranking fix above** — a clean re-run against
-  the current retrieval pipeline is the next planned step.
-- **Non-determinism invalidated two intermediate recalculations** before reaching the
-  clean baseline above — Gemini calls weren't temperature-pinned, so the agent loop
-  retrieved different evidence for the same question across runs. Fixed with
-  `temperature=0` on all Gemini calls. Not re-run multiple times to establish variance
-  (would cost real quota) — treat the current baseline as a single clean point estimate,
-  not a statistically characterized average.
+- **Current clean baseline (2026-09, RRF-boosted retrieval, single provider, no
+  failover): 19/31 (61.3%) answerable correctly cited, 7/8 (87.5%) adversarial correctly
+  abstained** — raw results in `data/eval/citation_verification_rrf_boosted.json`.
+  Adversarial jumped from 62.5% on the previous retrieval pipeline; answerable is
+  roughly flat (60.7% → 61.3%). This baseline has **not** yet been through the same
+  case-by-case failure audit the previous one got (below) — treat it as directionally
+  reliable, not fully verified.
+- **The previous baseline's headline numbers likely undercounted real accuracy**, and
+  the same is probably still true here. Failure analysis on 6 "failing" cases from that
+  run found zero confirmed system bugs — every one was an eval-construction artifact
+  (ground truth missing a valid alternate phrasing of the same fact; an abstention
+  metric that can't distinguish "cited evidence to fabricate" from "cited evidence to
+  explain an honest non-answer"; a truncated preview in the diagnostic tool itself
+  hiding the supporting text) or genuinely ambiguous source data. An LLM-based
+  entailment check was added to `_verify()` as a general safety net regardless — a
+  cross-encoder reranker was tried first for this and rejected (it measures topical
+  relevance, not entailment; a confirmed-bad and a confirmed-good citation both scored
+  0.97+).
+- **Temperature=0 reduces but doesn't eliminate run-to-run variance.** Spot-checking Q40
+  (highest-CET1-ratio-across-6-banks, adversarial) after the full run: the original run
+  didn't abstain (scored incorrect), but re-running the identical question moments later
+  correctly declared `unable_to_answer` (evidence had 5 of 6 banks' ratios, missing
+  Valley National — correctly hedging rather than guessing). Same temperature=0 setting,
+  different outcome. Consistent with the earlier finding that different Gemini
+  infrastructure routing can produce different outputs even at temperature=0 — pinning
+  temperature narrows variance, it doesn't guarantee determinism. Not re-run multiple
+  times to establish a full variance range (would cost real quota) — treat every
+  point-estimate baseline in this doc as a single clean run, not a statistically
+  characterized average.
 - **Not RAGAS.** The eval harness (`eval/ground_truth.py`, `retrieval_ablation.py`,
   `citation_verification.py`) gives real Hit@1/Hit@5/MRR and citation-accuracy metrics
   against 38 hand-verified questions, but doesn't compute RAGAS's faithfulness/context-

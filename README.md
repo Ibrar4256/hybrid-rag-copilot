@@ -29,15 +29,19 @@ fixed with RRF-boosted scoring (70% normalized cross-encoder + 30% RRF position 
 ADR-004), which preserves the reranker's rescue ability while anchoring to RRF ordering
 when scores are compressed.
 
-End-to-end citation accuracy (full agent loop + synthesis, Gemini) was last measured at
-60.7% answerable-correctly-cited / 62.5% adversarial-abstention — against the *previous*
-retrieval pipeline, before the fix above. A clean re-run against the current pipeline is
-next up. Failure analysis (`eval/failure_analysis.py`) on that run found that of 6
-"failing" cases inspected in full detail, **zero were confirmed real system bugs** —
-each was an eval-construction artifact (ground truth missing a valid alternate phrasing;
-an abstention metric that couldn't distinguish "cited evidence to fabricate" from "cited
-evidence to explain an honest non-answer"; adversarial questions whose assumed-absent
-data actually existed in the text). An LLM-based entailment check was added to
+End-to-end citation accuracy (full agent loop + synthesis, Gemini), clean re-run against
+the current RRF-boosted retrieval pipeline, single provider, no failover needed:
+**19/31 (61.3%) answerable questions correctly cited**, **7/8 (87.5%) adversarial
+questions correctly abstained** — up sharply from 62.5% on the previous pipeline. Raw
+results in `data/eval/citation_verification_rrf_boosted.json`. On the prior baseline,
+failure analysis (`eval/failure_analysis.py`) on 6 "failing" cases found zero confirmed
+system bugs — each was an eval-construction artifact (ground truth missing a valid
+alternate phrasing; an abstention metric that couldn't distinguish "cited evidence to
+fabricate" from "cited evidence to explain an honest non-answer"; adversarial questions
+whose assumed-absent data actually existed in the text). That same case-by-case audit
+hasn't been re-run against this new baseline yet, so the 61.3%/87.5% numbers likely
+still undercount true accuracy for the same reasons, just not yet individually
+re-verified — see `KNOWN_TRADEOFFS.md`. An LLM-based entailment check was added to
 `_verify()` as a general safety net regardless.
 
 See `ADR-004`, `WEEKLY_LOG.md`, and `KNOWN_TRADEOFFS.md` for the full decision and
@@ -166,8 +170,8 @@ this API-first version proved out).
 
 ## Roadmap (next layers, built incrementally)
 
-- A full clean citation-verification re-run against the current RRF-boosted retrieval
-  pipeline (the numbers above predate that fix — see the note in Results)
+- Case-by-case failure audit of the current citation-verification baseline (same rigor
+  applied to the previous baseline — see the note in Results)
 - Real token-by-token streaming and a React/Next.js frontend upgrade
 - Semantic cache for repeated/similar queries
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after

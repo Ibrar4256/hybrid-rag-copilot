@@ -1,0 +1,398 @@
+{
+  "answerable": [
+    {
+      "id": 1,
+      "question": "What were Western Alliance Bancorporation's total deposits at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 2,
+      "question": "What was Western Alliance's insured deposit ratio at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 3,
+      "question": "What was Western Alliance's deposit exposure to the technology industry as of December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 4,
+      "question": "What were Comerica's total deposits at year-end 2023 vs. year-end 2022, on a period-end basis?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 5,
+      "question": "What was Comerica's diluted net income per common share in 2023 vs. 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 6,
+      "question": "How much did Comerica's net income decline in 2023, and to what level?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 7,
+      "question": "What dividends did Comerica's subsidiary banks declare in 2023, 2022, and 2021?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 8,
+      "question": "What was Comerica's total uninsured deposits at year-end 2023 vs. year-end 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 9,
+      "question": "What was East West Bancorp's net income in 2023 vs. 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 10,
+      "question": "What were East West Bancorp's total assets, net loans, total deposits, and stockholders' equity at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 4,
+      "num_supported": 4,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 11,
+      "question": "What was East West Bancorp's CET1 capital ratio at December 31, 2023, vs. a year earlier?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 12,
+      "question": "What were Valley National Bancorp's total assets, net loans, deposits, and shareholders' equity at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 4,
+      "num_supported": 4,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 13,
+      "question": "How many branches did Valley National have and how were they distributed by state at year-end 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 5,
+      "num_supported": 5,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 14,
+      "question": "What was M&T Bank's average total deposits in 2023, and what was the year-over-year change?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 15,
+      "question": "What were M&T Bank's period-end core deposits at December 31 for 2023, 2022, and 2021?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 16,
+      "question": "What was Zions Bancorporation's total deposit change in 2023 (full year), and what drove it?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 4,
+      "num_supported": 4,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 17,
+      "question": "How did Zions' total deposits change differently across its operating segments in 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 18,
+      "question": "What was Western Alliance's uninsured deposit position at December 31, 2022, and how does it relate to the 45% insured ratio?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 19,
+      "question": "How did Western Alliance's risk factors change between the FY2022 and FY2023 10-K regarding bank-failure/deposit-stress risk?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 20,
+      "question": "Trace Western Alliance's total deposits across every quarter of 2023 plus FY2022/FY2023 year-end figures.",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 5,
+      "num_supported": 5,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 21,
+      "question": "How did Zions' total deposits at March 31, 2023 compare to year-end 2022 and to March 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 22,
+      "question": "Compare Comerica's and Western Alliance's period-end deposit trends in 2023.",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 23,
+      "question": "What specific actions did Zions take during Q2 2023 in response to the regional banking stress?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 24,
+      "question": "Which bank had the larger year-over-year swing in shareholders' equity, Comerica or East West?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": true
+    },
+    {
+      "id": 26,
+      "question": "How does M&T Bank's declining Stress Capital Buffer relate to its CET1 capital requirement?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 27,
+      "question": "What acquisition explains most of the change in M&T's average core deposits between 2021 and 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 2,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 28,
+      "question": "Compare WAL's insured-deposit-ratio recovery against Comerica's uninsured-deposit dollar trend.",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 2,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 29,
+      "question": "How did Zions' loan-to-deposit ratio change from March 2022 to March 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 31,
+      "question": "What was East West Bancorp's exact deposit composition by category (checking, savings, time deposits, etc.) as a percentage breakdown at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 5,
+      "num_supported": 5,
+      "cited_correct_chunk": true,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 38,
+      "question": "What was M&T Bank's total deposits at December 31, 2023 (period-end, not average)?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    },
+    {
+      "id": 41,
+      "question": "What was Western Alliance's total deposits as of FY2023 10-K?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 1,
+      "cited_correct_chunk": false,
+      "declared_unable_to_answer": false
+    }
+  ],
+  "adversarial": [
+    {
+      "id": 32,
+      "question": "What was Valley National Bancorp's workforce gender composition at year-end 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 33,
+      "question": "What was Silicon Valley Bank's total deposits at the time of its failure in March 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 34,
+      "question": "What were Western Alliance's total deposits at December 31, 2024?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 35,
+      "question": "What was Zions Bancorporation's total deposits at December 31, 2021?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 36,
+      "question": "What was Comerica's provision for credit losses in Q2 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 37,
+      "question": "Did Comerica report a net loss in any quarter of 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 39,
+      "question": "What was Western Alliance's total deposits at June 30, 2022?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 1,
+      "num_supported": 0,
+      "declared_unable_to_answer": true,
+      "correctly_abstained": true
+    },
+    {
+      "id": 40,
+      "question": "Which of the 6 banks in this corpus had the highest CET1 ratio at December 31, 2023?",
+      "provider": "gemini",
+      "evidence_found": true,
+      "num_claims": 5,
+      "num_supported": 5,
+      "declared_unable_to_answer": false,
+      "correctly_abstained": false
+    }
+  ],
+  "mixed_providers": false,
+  "providers_used": "{'gemini'}"
+}
