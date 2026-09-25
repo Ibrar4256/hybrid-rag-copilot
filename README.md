@@ -7,6 +7,8 @@ cited, synthesized answers over a document corpus instead of a list of links.
 `bge-reranker-base` (local, CPU) · Gemini function calling (+ Groq/OpenRouter/SambaNova/
 Cerebras failover) · Docker Compose · vanilla JS UI
 
+![Research Copilot answering a multi-fact question with per-claim citations and query telemetry](docs/images/demo-answer.png)
+
 ## Results (Week 1)
 
 Eval corpus: 18 SEC filings (10-Ks + 10-Qs) for 6 regional banks, chosen specifically for
@@ -177,7 +179,12 @@ this API-first version proved out).
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
   mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
 - Integration and eval-based tests (unit tests covering pure logic exist — see Testing
-  below), and a live deployment — the remaining cross-cutting-bar items
+  below) — the remaining cross-cutting-bar item
+
+**Deliberately not deployed live:** free-tier Gemini latency (15-115s/call) and a hard
+daily quota make a public live demo more likely to embarrass than impress — Docker +
+docker-compose already prove this runs and is reachable; a real deployment target is a
+separate decision (hosting for Qdrant, secrets, cost) for if/when it's actually needed.
 
 Full granular tradeoffs and known gaps (provider coverage, eval-set corrections, schema
 edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than glossed over.
@@ -233,11 +240,21 @@ eval-based tests (wiring the eval harness into CI) are still open — see Roadma
 
 ## Cost
 
-$0 for retrieval — local embeddings, local reranker, Qdrant in Docker. The agent loop and
-citation synthesis run on free-tier LLM APIs (Gemini primary, 4-provider failover — see
-ADR-007). Every call (ADR-009) is logged with provider, model, tokens in/out, latency, and
-computed cost to `data/telemetry/calls.jsonl`, surfaced per-query and in aggregate in the
-UI — a real end-to-end query (9 LLM calls across the agent loop + synthesis) came in at
-**$0.000613**. Free-tier latency varies with provider load (see `KNOWN_TRADEOFFS.md` for
-details); a cost model against paid-tier pricing at 1,000 users/month is not yet written
-up — next on the roadmap.
+$0 to build and run this — local embeddings, local reranker, Qdrant in Docker, and the
+agent loop + citation synthesis on free-tier LLM APIs (Gemini primary, 4-provider
+failover — see ADR-007). Every call (ADR-009) is logged with provider, model, tokens
+in/out, latency, and computed cost to `data/telemetry/calls.jsonl`. Cost is computed at
+**published paid-tier rates** even though actual free-tier usage is $0 — so the number
+below reflects what a real paid deployment would cost, not just this project's actual
+bill.
+
+Aggregated across 222 real queries: **$0.00114 average cost per query**. Extrapolated
+(published-rate cost/query × queries/day × 30 days × 1,000 users):
+
+| Usage | Cost / 1,000 users / month |
+|---|---|
+| 5 queries/day | $171 |
+| 10 queries/day | $343 |
+| 20 queries/day | $686 |
+
+Free-tier latency varies with provider load (see `KNOWN_TRADEOFFS.md` for details).
