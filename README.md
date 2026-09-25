@@ -176,8 +176,8 @@ this API-first version proved out).
 - Semantic cache for repeated/similar queries
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
   mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
-- Tests (unit/integration/eval-based), CI/CD, Dockerfile, and an actual deployment —
-  the remaining cross-cutting-bar items
+- Integration and eval-based tests (unit tests covering pure logic exist — see Testing
+  below), and a live deployment — the remaining cross-cutting-bar items
 
 Full granular tradeoffs and known gaps (provider coverage, eval-set corrections, schema
 edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than glossed over.
@@ -197,6 +197,12 @@ cp .env.example .env   # defaults to local_bge + local_cross_encoder
 # (not required for raw retrieval via research_copilot.query)
 ```
 
+Or run the whole stack (API + Qdrant) in Docker instead of a local venv:
+
+```bash
+docker compose up -d --build   # API on :8000, Qdrant on :6333
+```
+
 ## Run
 
 ```bash
@@ -210,6 +216,20 @@ python -m research_copilot.answer "your question here"    # full agentic loop + 
 
 First run downloads the local models (`bge-base-en-v1.5`, `bge-reranker-base`,
 fastembed's BM25 model) — expect a one-time delay.
+
+## Testing
+
+```bash
+pip install -r requirements-dev.txt
+pytest -v
+```
+
+23 unit tests covering the pure-logic surfaces (chunking boundaries, the RRF-boosted
+rerank math, `retry.py`'s backoff/quota-detection branches, `synthesis._verify()`'s
+citation-existence and entailment-batching logic) — no live Qdrant or API calls needed,
+runs in under a second. Wired into GitHub Actions on every push/PR
+(`.github/workflows/tests.yml`). Integration tests (against a real Qdrant) and
+eval-based tests (wiring the eval harness into CI) are still open — see Roadmap.
 
 ## Cost
 
