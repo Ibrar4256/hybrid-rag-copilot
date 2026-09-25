@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Research Copilot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/style.css?v=2">
+</head>
+<body>
+<div class="layout">
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2>Research Copilot</h2>
+      <button id="new-chat-btn" class="new-chat-btn">+ New Chat</button>
+    </div>
+    <div id="history-list" class="history-list"></div>
+  </aside>
+
+  <main>
+    <button id="sidebar-toggle" class="sidebar-toggle" title="Toggle sidebar">&#9776;</button>
+
+    <header>
+      <h1>Research Copilot</h1>
+      <p class="subtitle">Cited, synthesized answers over 18 regional-bank SEC filings.</p>
+    </header>
+
+    <form id="ask-form">
+      <textarea id="question" rows="2" placeholder="e.g. What was Western Alliance's total deposits at December 31, 2023?" required></textarea>
+      <button type="submit" id="ask-btn">Ask</button>
+    </form>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="answer" hidden>
+      <h2>Answer</h2>
+      <div id="claims"></div>
+    </section>
+
+    <section id="evidence-panel" hidden>
+      <h2>Source</h2>
+      <div id="evidence-content"></div>
+    </section>
+
+    <section id="telemetry-panel" hidden>
+      <h2>Query Telemetry</h2>
+      <div id="telemetry-summary" class="telemetry-summary"></div>
+      <details>
+        <summary>Call breakdown</summary>
+        <table id="telemetry-table" class="telemetry-table">
+          <thead>
+            <tr><th>Type</th><th>Provider</th><th>Tokens In</th><th>Tokens Out</th><th>Latency</th><th>Cost</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section id="aggregate-panel">
+      <details>
+        <summary class="aggregate-toggle">Aggregate stats (all queries)</summary>
+        <div id="aggregate-content" class="aggregate-content"></div>
+      </details>
+    </section>
+  </main>
+</div>
+<script src="/static/app.js?v=2"></script>
+</body>
+</html>
