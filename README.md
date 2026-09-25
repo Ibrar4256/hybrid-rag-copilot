@@ -209,11 +209,11 @@ fastembed's BM25 model) — expect a one-time delay.
 
 ## Cost
 
-$0 for retrieval (local embeddings, local reranker, Qdrant in Docker). The agent loop and
-citation synthesis use Gemini's free tier — note its **daily** quota (not just per-minute)
-is easy to exhaust while testing; see `KNOWN_TRADEOFFS.md`. Every LLM call (ADR-009) is
-logged to `data/telemetry/calls.jsonl` with provider, model, tokens in/out, latency, and
-computed cost, surfaced per-query and in aggregate in the UI — a real query end-to-end
-(WAL deposits, 9 LLM calls) measured $0.000613 and 115.7s wall-clock on a slow Gemini
-free-tier day. A "cost for 1,000 users/month" model is not yet written up — next on the
-cross-cutting-bar list.
+$0 for retrieval — local embeddings, local reranker, Qdrant in Docker. The agent loop and
+citation synthesis run on free-tier LLM APIs (Gemini primary, 4-provider failover — see
+ADR-007). Every call (ADR-009) is logged with provider, model, tokens in/out, latency, and
+computed cost to `data/telemetry/calls.jsonl`, surfaced per-query and in aggregate in the
+UI — a real end-to-end query (9 LLM calls across the agent loop + synthesis) came in at
+**$0.000613**. Free-tier latency varies with provider load (see `KNOWN_TRADEOFFS.md` for
+details); a cost model against paid-tier pricing at 1,000 users/month is not yet written
+up — next on the roadmap.
