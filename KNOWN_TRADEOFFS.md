@@ -85,6 +85,23 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
   disk checkpoint exists for future failures at larger scale).
 - **Gemini embedding provider and Cohere reranker are wired but untested end-to-end** —
   no Cohere key configured, Gemini embedding path never exercised.
+- **The agent loop over-searches on multi-fact questions, even when one chunk already
+  answers everything.** Observed live: asking for 4 facts about one company at one date
+  (assets, loans, deposits, equity) burned all `MAX_SEARCH_ITERATIONS=4` rounds and 15
+  total LLM/local calls (~18-30s latency), even though all 4 answers came from the exact
+  same chunk found in round 1 (confirmed: all 4 claims cited `EWBC_10-K_2023-12-31.md#28`).
+  The existing zero-new-chunks early-stop (`agent.py`) didn't fire because later rounds'
+  reranked candidates weren't byte-identical sets, just redundant in substance. Tried a
+  targeted fix: added an explicit system-prompt rule telling the model to check whether
+  already-gathered evidence covers every fact before searching again. **Re-ran the exact
+  same question — zero change: still 4 rounds, still 15 calls.** Reverted the prompt
+  change since it had no measurable effect. Conclusion: this isn't a prompt-wording gap,
+  it's a capability limit of `gemini-flash-lite` (chosen for speed/cost — ADR-005) — a
+  cheap, non-reasoning model doesn't reliably self-regulate loop continuation even when
+  told to explicitly. A real fix would need either a deterministic code-level check
+  (e.g., stop early if the top-ranked candidate repeats across rounds, not just literal
+  zero-new-chunks) or a more capable model for the continue/stop decision specifically —
+  neither attempted yet.
 
 ## Data coverage
 
