@@ -178,8 +178,8 @@ this API-first version proved out).
 - Semantic cache for repeated/similar queries
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
   mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
-- Integration and eval-based tests (unit tests covering pure logic exist — see Testing
-  below) — the remaining cross-cutting-bar item
+- Integration tests against a real Qdrant (unit tests and an eval-based CI regression
+  gate both exist — see Testing below) — the remaining cross-cutting-bar item
 
 **Deliberately not deployed live:** free-tier Gemini latency (15-115s/call) and a hard
 daily quota make a public live demo more likely to embarrass than impress — Docker +
@@ -235,8 +235,16 @@ pytest -v
 rerank math, `retry.py`'s backoff/quota-detection branches, `synthesis._verify()`'s
 citation-existence and entailment-batching logic) — no live Qdrant or API calls needed,
 runs in under a second. Wired into GitHub Actions on every push/PR
-(`.github/workflows/tests.yml`). Integration tests (against a real Qdrant) and
-eval-based tests (wiring the eval harness into CI) are still open — see Roadmap.
+(`.github/workflows/tests.yml`).
+
+**Eval-as-infra:** `.github/workflows/eval.yml` runs the offline retrieval ablation
+(`eval.ci_gate`) as a CI regression gate — fails the build if Hit@1 on the real 18-filing
+corpus drops below 25% (comfortably below the current 32.3%, but well above the pre-fix
+regressed configs, so it actually catches a real regression). Path-filtered to only
+retrieval-relevant files, not every push — full corpus ingestion measured at ~55 minutes
+on local CPU embedding, so the ingested Qdrant data is cached (keyed by a hash of the
+corpus + chunking config) rather than rebuilt every run. Integration tests against a real
+Qdrant are still open — see Roadmap.
 
 ## Cost
 

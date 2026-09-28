@@ -1,0 +1,97 @@
+name: Retrieval Eval
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/research_copilot/chunking.py"
+      - "src/research_copilot/query.py"
+      - "src/research_copilot/vector_store.py"
+      - "src/research_copilot/config.py"
+      - "src/research_copilot/providers.py"
+      - "src/research_copilot/embeddings/**"
+      - "src/research_copilot/sparse/**"
+      - "src/research_copilot/reranker/**"
+      - "src/research_copilot/ingest.py"
+      - "src/research_copilot/eval/**"
+      - "data/sec_filings/**"
+      - ".github/workflows/eval.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "src/research_copilot/chunking.py"
+      - "src/research_copilot/query.py"
+      - "src/research_copilot/vector_store.py"
+      - "src/research_copilot/config.py"
+      - "src/research_copilot/providers.py"
+      - "src/research_copilot/embeddings/**"
+      - "src/research_copilot/sparse/**"
+      - "src/research_copilot/reranker/**"
+      - "src/research_copilot/ingest.py"
+      - "src/research_copilot/eval/**"
+      - "data/sec_filings/**"
+      - ".github/workflows/eval.yml"
+  workflow_dispatch: {}
+
+jobs:
+  retrieval-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Local models (bge-base, bge-reranker-base, fastembed BM25) are a few
+      # hundred MB — cache them independently of the corpus cache below so a
+      # corpus/config change doesn't also force a model re-download.
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-bge-v1
+
+      # Full corpus ingestion (18 SEC filings -> ~17k chunks, local CPU
+      # embedding) takes ~55 minutes — measured directly, not estimated. Not
+      # something to pay on every run. Cache key is a hash of the actual
+      # corpus files + config.py (chunk size/overlap), so this only
+      # invalidates when the ingested data would actually be different.
+      - name: Compute corpus cache key
+        id: corpus-key
+        run: |
+          echo "hash=$(find data/sec_filings src/research_copilot/config.py -type f | sort | xargs sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache ingested Qdrant data
+        id: qdrant-cache
+        uses: actions/cache@v4
+        with:
+          path: qdrant_data
+          key: qdrant-sec-filings-chunk200-${{ steps.corpus-key.outputs.hash }}
+
+      - name: Install dependencies
+        run: |
+          pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+
+      - name: Start Qdrant
+        run: |
+          mkdir -p qdrant_data
+          docker run -d --name qdrant -p 6333:6333 \
+            -v ${{ github.workspace }}/qdrant_data:/qdrant/storage \
+            qdrant/qdrant:v1.11.0
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/collections > /dev/null && break
+            sleep 2
+          done
+
+      - name: Ingest corpus (only on cache miss)
+        if: steps.qdrant-cache.outputs.cache-hit != 'true'
+        run: |
+          export PYTHONPATH=src
+          python -m research_copilot.ingest data/sec_filings sec_filings_banks_chunk200
+
+      - name: Run retrieval regression gate
+        run: |
+          export PYTHONPATH=src
+          python -m research_copilot.eval.ci_gate
