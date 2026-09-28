@@ -111,6 +111,20 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
   (e.g., stop early if the top-ranked candidate repeats across rounds, not just literal
   zero-new-chunks) or a more capable model for the continue/stop decision specifically —
   neither attempted yet.
+- **Considered, not implemented: query routing to skip the agent loop entirely for
+  simple factual questions.** A classify-then-route pattern (simple lookups go straight
+  to one-shot hybrid retrieval + rerank, only genuinely complex/multi-hop questions get
+  the agentic multi-search loop) is a legitimate production cost/latency optimization —
+  and worth knowing for an interview answer about production hardening. Deliberately not
+  built here for two reasons: (1) it wouldn't have fixed the over-search case just
+  above — a single-entity, single-date, multi-field question ("assets, loans, deposits,
+  and equity as of Dec 31") isn't obviously "simple" to a classifier even though one
+  chunk answers all of it, so the actual fix still needs to be the deterministic
+  early-stop, not upstream routing; (2) this project's own stated purpose (CLAUDE.md) is
+  specifically to demonstrate agentic retrieval decision-making — routing "simple"
+  queries around the agent would reduce, not showcase, the competency Project 1 exists
+  to prove. Revisit for a real production deployment where cost/latency matters more
+  than demonstrating the agentic pattern itself.
 
 ## Data coverage
 
