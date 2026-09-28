@@ -67,6 +67,15 @@ history and debugging trail lives in `WEEKLY_LOG.md`.
   against 38 hand-verified questions, but doesn't compute RAGAS's faithfulness/context-
   precision scores specifically, and 38 questions is on the low end of the ~30-50
   question range originally scoped.
+- **Citation-accuracy eval is NOT wired into CI, deliberately.** `eval.ci_gate` (CI)
+  covers retrieval quality only — fully offline, local models, safe to run on every
+  trigger. `citation_verification.py` needs real Gemini calls, and free-tier daily quota
+  is a shared, exhaustible resource across this project's own manual testing — a CI run
+  that goes red because someone else's dev-time testing burned the day's quota isn't a
+  real regression signal, it's noise. The harness itself is real and exercised manually/
+  periodically (61.3%/87.5% baseline above). Revisit if this project ever moves off
+  free-tier LLM APIs.
+
 ## Infrastructure & operations
 
 - **Gemini's daily quota (not just per-minute) is a hard constraint** that client-side

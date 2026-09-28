@@ -178,13 +178,12 @@ this API-first version proved out).
 - Semantic cache for repeated/similar queries
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
   mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
-- Integration tests against a real Qdrant (unit tests and an eval-based CI regression
-  gate both exist — see Testing below) — the remaining cross-cutting-bar item
 
 **Deliberately not deployed live:** free-tier Gemini latency (15-115s/call) and a hard
 daily quota make a public live demo more likely to embarrass than impress — Docker +
-docker-compose already prove this runs and is reachable; a real deployment target is a
-separate decision (hosting for Qdrant, secrets, cost) for if/when it's actually needed.
+docker-compose already prove this runs and is reachable. Live deployment effort is
+being saved for a later project in the portfolio better suited to it (larger scope,
+less free-tier-latency risk) rather than spent here.
 
 Full granular tradeoffs and known gaps (provider coverage, eval-set corrections, schema
 edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than glossed over.
@@ -228,14 +227,27 @@ fastembed's BM25 model) — expect a one-time delay.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest -v
+
+pytest -v -m "not integration"   # unit tests: no Qdrant needed, <1s
+docker compose up -d qdrant
+pytest -v -m integration         # integration tests: real Qdrant, real local models, ~60s
 ```
 
 23 unit tests covering the pure-logic surfaces (chunking boundaries, the RRF-boosted
 rerank math, `retry.py`'s backoff/quota-detection branches, `synthesis._verify()`'s
-citation-existence and entailment-batching logic) — no live Qdrant or API calls needed,
-runs in under a second. Wired into GitHub Actions on every push/PR
-(`.github/workflows/tests.yml`).
+citation-existence and entailment-batching logic) — mocked dependencies, no live Qdrant
+or API calls, runs in under a second.
+
+6 integration tests (`test_integration_retrieval.py`) run the real pipeline — real
+Qdrant, real local `bge-base`/`bge-reranker-base` inference, real ingestion of
+`data/sample_docs` into a dedicated collection (session-scoped fixture, torn down after)
+— across dense-only/hybrid/hybrid+rerank modes, including content-relevance checks (a
+Qdrant-specific query surfaces `vector_databases.md`, not `rag.md`, and vice versa) that
+the mocked unit tests can't cover.
+
+Both suites wired into GitHub Actions on every push/PR (`.github/workflows/tests.yml`,
+separate `unit-tests` and `integration-tests` jobs — the latter with a Qdrant service
+container).
 
 **Eval-as-infra:** `.github/workflows/eval.yml` runs the offline retrieval ablation
 (`eval.ci_gate`) as a CI regression gate — fails the build if Hit@1 on the real 18-filing
@@ -243,8 +255,7 @@ corpus drops below 25% (comfortably below the current 32.3%, but well above the 
 regressed configs, so it actually catches a real regression). Path-filtered to only
 retrieval-relevant files, not every push — full corpus ingestion measured at ~55 minutes
 on local CPU embedding, so the ingested Qdrant data is cached (keyed by a hash of the
-corpus + chunking config) rather than rebuilt every run. Integration tests against a real
-Qdrant are still open — see Roadmap.
+corpus + chunking config) rather than rebuilt every run.
 
 ## Cost
 
