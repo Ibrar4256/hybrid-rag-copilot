@@ -179,11 +179,11 @@ this API-first version proved out).
 - Contextual Retrieval upgrade (Parent-Child chunking was tried and rejected after
   mixed/regressive results — see `KNOWN_TRADEOFFS.md`)
 
-**Deliberately not deployed live:** free-tier Gemini latency (15-115s/call) and a hard
-daily quota make a public live demo more likely to embarrass than impress — Docker +
-docker-compose already prove this runs and is reachable. Live deployment effort is
-being saved for a later project in the portfolio better suited to it (larger scope,
-less free-tier-latency risk) rather than spent here.
+**Deliberately not deployed live** (ADR-010): free-tier Gemini latency (15-115s/call)
+and a hard daily quota make a public live demo more likely to embarrass than impress —
+Docker + docker-compose already prove this runs and is reachable. Live deployment
+effort is being saved for a later project in the portfolio better suited to it (larger
+scope, less free-tier-latency risk) rather than spent here.
 
 Full granular tradeoffs and known gaps (provider coverage, eval-set corrections, schema
 edge cases, etc.) are tracked honestly in `KNOWN_TRADEOFFS.md` rather than glossed over.
@@ -249,7 +249,7 @@ Both suites wired into GitHub Actions on every push/PR (`.github/workflows/tests
 separate `unit-tests` and `integration-tests` jobs — the latter with a Qdrant service
 container).
 
-**Eval-as-infra:** `.github/workflows/eval.yml` runs the offline retrieval ablation
+**Eval-as-infra** (ADR-011): `.github/workflows/eval.yml` runs the offline retrieval ablation
 (`eval.ci_gate`) as a CI regression gate — fails the build if Hit@1 on the real 18-filing
 corpus drops below 25% (comfortably below the current 32.3%, but well above the pre-fix
 regressed configs, so it actually catches a real regression). Path-filtered to only

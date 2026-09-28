@@ -1106,3 +1106,155 @@ project's own stated verification standard):**
 - Full end-to-end eval re-run with the RRF-boosted reranker to measure citation-level
   impact (not just retrieval-level)
 - Cross-cutting bar: tests, CI/CD, deployment, semantic cache, streaming
+
+## Week 2 (cont.) — Closing out the cross-cutting bar: eval re-run, tests, CI, Docker, deployment decision
+
+**What shipped:**
+
+*Recruiter-sharing polish:* first real `git init` for the repo (79 files, one commit),
+pushed to `github.com/Ibrar4256/hybrid-rag-copilot`. Then a full pass reviewing the repo
+as a recruiter would actually see it: fixed stale numbers in README (was showing
+pre-RRF-fix retrieval results), removed `CLAUDE.md` and `docs/interview_prep/` from the
+shared repo (AI-scaffolding/interview-cheat-sheet flavored, kept locally), rewrote
+`KNOWN_TRADEOFFS.md` from a 272-line debugging diary into ~90 lines of concise
+fact/impact/mitigation bullets, trimmed the Cost section's worst-case latency framing.
+Caught two stale doc-vs-code claims while doing this: the `unable_to_answer` synthesis
+field was already implemented (ADR-006 addendum) despite KNOWN_TRADEOFFS still listing
+it as missing, and the BM25 caveat still referenced a "2 sample documents" corpus from a
+much earlier dev stage instead of the real 18-filing one.
+
+*Clean citation-verification re-run:* full 39-question run against the current
+RRF-boosted retrieval pipeline, single Gemini provider, no failover needed.
+
+| Metric | Old (pre-RRF-fix) | New (clean re-run) |
+|---|---|---|
+| Answerable correctly cited | 60.7% | **61.3%** (19/31) |
+| Adversarial correctly abstained | 62.5% | **87.5%** (7/8) |
+
+Adversarial jumped sharply; answerable stayed roughly flat — reported honestly rather
+than only highlighting the number that improved. Spot-checked the one new adversarial
+failure (Q40, cross-bank CET1 comparison) via `failure_analysis.py`: re-running the
+identical question produced a *different* verdict than the original run despite
+`temperature=0`, confirming temperature pinning reduces but doesn't eliminate Gemini's
+run-to-run variance. Did not repeat the full 6-case failure audit the previous baseline
+got — both README and KNOWN_TRADEOFFS explicitly flag the new numbers as directionally
+reliable, not yet individually re-verified, rather than quietly relaxing the honesty bar
+for a better-looking number.
+
+*Tests + CI:* 23 unit tests (`test_chunking.py`, `test_retry.py`,
+`test_query_rerank.py`, `test_synthesis_verify.py`) covering pure logic — chunking
+boundaries, `with_backoff()`'s rate-limit/quota-detection branches, the RRF-boosted
+rerank math (compressed-score fallback, deep-candidate rescue, div-by-zero guard),
+`synthesis._verify()`'s citation-existence and entailment-batching logic. All mock the
+one real dependency each touches; no live Qdrant or API calls; runs in under a second.
+`.github/workflows/tests.yml` runs them on every push/PR — confirmed actually green on
+GitHub via `gh run list`, not just assumed from local passing.
+
+*Docker:* `Dockerfile` + a new `api` service in `docker-compose.yml`. Building it caught
+a real bug: README's own documented `pip install torch --index-url .../whl/cpu` command
+was broken — `--index-url` fully replaces PyPI instead of supplementing it, so
+`typing-extensions` (a torch dependency) couldn't resolve its build dependency from the
+CPU-only wheel index. It had only worked locally because some other already-installed
+package had already satisfied `typing-extensions` first. Fixed to `--extra-index-url` in
+both the Dockerfile and README. Verified the container end-to-end, not just "docker
+build succeeded": ran it against the real Qdrant service, confirmed it serves the UI,
+connects to Qdrant, and a real `/api/ask` query returns a correct cited answer ($55.3B
+WAL deposits, correct chunk IDs) with telemetry logged — local embedding + reranker
+model inference all work inside the slim container.
+
+*Demo screenshot + cost model:* captured a real 4-claim query (East West Bancorp
+financials — assets, loans, deposits, equity, all correctly cited to the same source
+chunk) and added it to the top of the README. While updating the Cost section, found the
+UI already computes a real "cost per 1,000 users/month" figure
+(`/api/telemetry/summary`, backed by `telemetry.py` logging at published paid-tier rates
+even though actual usage is free-tier $0) that the README was incorrectly still
+describing as "not written up yet." Surfaced the real numbers: $0.00114 average
+cost/query across 222 real queries, $171/$343/$686 per 1,000 users/month at 5/10/20
+queries/day.
+
+*Agent over-search investigation:* user noticed a query taking 15 LLM calls despite all
+4 answers coming from a single chunk. Root-caused it: the system prompt already
+instructs the model to "stop searching if you already have enough," but
+`gemini-flash-lite` doesn't reliably follow that for multi-fact questions — it ran all 4
+`MAX_SEARCH_ITERATIONS` rounds anyway. Tried a targeted fix (a stronger, more explicit
+prompt rule), re-ran the identical question live, got zero change (still 15 calls,
+still 4 rounds). Reverted the prompt edit since it had no measured effect, and
+documented the finding as a real negative result in KNOWN_TRADEOFFS.md instead of either
+hiding the failed attempt or leaving unproven prompt text in place.
+
+*Eval-as-infra:* wired the offline retrieval ablation into CI as a real regression gate
+(`eval/ci_gate.py`, fails if Hit@1 < 25%). Before building it, measured (not estimated)
+that full corpus ingestion takes ~55 minutes locally — far too slow for "every push."
+Solved with path-filtered triggers (only retrieval-relevant files) plus `actions/cache`
+for the ingested Qdrant data, keyed by a hash of the corpus + chunking config. First
+real GitHub Actions run: 1h10m42s (cache miss, as expected), passed with real numbers
+(Hit@1 32.3%, Hit@5 54.8%, MRR 0.395), cache saved (~93MB Qdrant data, ~1.2GB HF
+models) so future triggering runs restore from cache instead of re-ingesting.
+
+*Integration tests:* 6 tests against a REAL Qdrant (no mocks) — real
+`bge-base`/`bge-reranker-base` inference, real ingestion of `data/sample_docs` (~60s,
+not 55min, since it's 12KB not 8.5MB) into a dedicated collection, including
+content-relevance checks (a Qdrant-specific query surfaces `vector_databases.md` not
+`rag.md`, and vice versa) that the mocked unit tests structurally can't cover. New
+`.github/workflows/tests.yml` job (`integration-tests`) with a Qdrant service
+container, separate from the fast `unit-tests` job. Validated locally (6/6, 64s) and
+confirmed green on real GitHub Actions runners before considering it done.
+
+*Deployment decision:* walked through CLAUDE.md's cross-cutting-bar checklist item by
+item against actual project state (not assumed) — found two real gaps: integration
+tests (closed, above) and live deployment. Presented deployment target options
+(Fly.io/Render/VPS) with real trade-offs; user's call was to defer deployment entirely
+to a later, bigger-scope portfolio project rather than force it here, given free-tier
+Gemini's latency/quota would more likely embarrass than impress in an unpredictable
+public demo. Documented as ADR-010, with the same rigor (all options considered, not
+just the chosen one) as every other architecture decision in this project. Also wrote
+ADR-011 for the eval-as-CI-infra design (the caching/path-filtering approach above),
+and explicitly declined to wire the LLM-dependent citation eval into CI — same
+free-tier-quota-sharing reasoning as the deployment decision, documented in
+KNOWN_TRADEOFFS.md rather than silently left undone.
+
+**What broke:**
+- `git rm CLAUDE.md` and `git rm INTERVIEW_DECISION_BANK.md` (without `--cached`) were
+  used to exclude these from the shared repo — this deletes the file from disk too, not
+  just from git tracking. Told the user "kept locally, gitignored," which was wrong.
+  Caught when the user asked to reference CLAUDE.md's actual content in a later turn and
+  it didn't exist. Recovered both files (and `docs/interview_prep/*`, same mistake) from
+  git history (`git show <commit-before-removal>:<path>`) and verified they're now
+  correctly untracked+ignored, not deleted and not accidentally re-staged.
+- The local dev `uvicorn` process and the new Docker `api` container both wanted port
+  8000; testing the Docker container required either stopping the local process or
+  using an alternate port — not a code bug, just a same-machine port conflict worth
+  remembering when both a bare-venv dev server and `docker compose up` might run at once.
+
+**What I learned:**
+- "The docs say X isn't built yet" is a claim to verify against actual code, not a fact
+  to trust — this session caught four separate cases of stale doc claims (the
+  `unable_to_answer` field, the BM25 corpus-size caveat, the cost-per-1000-users model,
+  and the broken torch install command) by actually checking the code/running the
+  command instead of trusting what a README or tradeoffs doc already said.
+- A soft prompt instruction ("stop searching if you have enough") is not a reliable
+  control mechanism for a small non-reasoning model under real conditions — verified
+  this empirically (re-ran the same question live before and after the prompt change)
+  rather than assuming the fix worked because the instruction "should" cover it.
+  Capability limits need a different kind of fix (deterministic code, not prompt
+  wording) than instruction-following gaps do, and the only way to tell which one you're
+  looking at is to actually test the fix, not just reason about it.
+- Measuring instead of estimating changed the entire eval-in-CI design: guessing "corpus
+  ingestion is probably fine to run on every push" would have shipped an unworkable
+  55-minute CI job; timing it first (`time python -m research_copilot.ingest ...`)
+  surfaced the real constraint before any workflow YAML got written, not after.
+- When excluding a file from git tracking specifically to keep it local (not delete it
+  everywhere), `git rm --cached` is the only correct command — bare `git rm` deletes the
+  working-tree copy too, and `git status` looking clean afterward doesn't distinguish
+  "file gone" from "file still there, just untracked." Verify with `ls`, not just `git
+  status`.
+
+**What's next:**
+- Project 1's cross-cutting bar is now closed except for live deployment, which is a
+  deliberate, ADR-documented deferral (ADR-010), not an oversight.
+- Lower-priority open items, not blocking: the case-by-case failure audit of the
+  61.3%/87.5% citation baseline (same rigor as the old baseline got), the agent
+  over-search inefficiency (a real fix needs a deterministic code-level early-stop, not
+  another prompt attempt), and the older deferred feature items (streaming, React
+  frontend, semantic cache, Contextual Retrieval).
+- Moving to Project 2 (Agentic Support Copilot) per CLAUDE.md's project order.
