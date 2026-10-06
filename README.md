@@ -1,4 +1,4 @@
-# Research Copilot
+# Hybrid RAG Copilot
 
 A scoped-down but architecturally real clone of what Perplexity/You.com charge $20/mo for:
 cited, synthesized answers over a document corpus instead of a list of links.
@@ -7,7 +7,7 @@ cited, synthesized answers over a document corpus instead of a list of links.
 `bge-reranker-base` (local, CPU) · Gemini function calling (+ Groq/OpenRouter/SambaNova/
 Cerebras failover) · Docker Compose · vanilla JS UI
 
-![Research Copilot answering a multi-fact question with per-claim citations and query telemetry](docs/images/demo-answer.png)
+![Hybrid RAG Copilot answering a multi-fact question with per-claim citations and query telemetry](docs/images/demo-answer.png)
 
 ## Results (Week 1)
 
