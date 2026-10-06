@@ -1,4 +1,4 @@
-# ADR-005: Agentic Loop for Research Copilot
+# ADR-005: Agentic Loop for Hybrid RAG Copilot
 
 ## Context
 The current pipeline (ADR-001 through ADR-004) performs one fixed retrieve → rerank pass regardless of the question. The project requires the model to decide whether to search at all, what to search for (possibly multiple or reformulated queries), and when it has gathered enough evidence to answer — not a single hardcoded retrieve-then-generate call. This is also the first hands-on agent-loop implementation in the portfolio; Project 2 later asks for a hand-rolled agent loop specifically so the mechanics under any framework are understood, and there's no reason to defer that learning past Project 1 when the spec already requires equivalent capability here.

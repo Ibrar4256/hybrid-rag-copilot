@@ -1,7 +1,7 @@
-# ADR-001: Vector Store for Research Copilot
+# ADR-001: Vector Store for Hybrid RAG Copilot
 
 ## Context
-Project 1 (Research Copilot) needs a retrieval layer supporting hybrid search (dense + BM25/sparse) with a downstream cross-encoder reranker. This is a learning-focused portfolio project, not a cost/complexity-constrained production system — we are explicitly optimizing for depth of understanding of retrieval infrastructure and relevance to real-world AI engineering job requirements, over minimizing moving parts. Must run free/self-hosted (no paid managed service required) so the full eval suite can be run repeatedly at no cost.
+Project 1 (Hybrid RAG Copilot) needs a retrieval layer supporting hybrid search (dense + BM25/sparse) with a downstream cross-encoder reranker. This is a learning-focused portfolio project, not a cost/complexity-constrained production system — we are explicitly optimizing for depth of understanding of retrieval infrastructure and relevance to real-world AI engineering job requirements, over minimizing moving parts. Must run free/self-hosted (no paid managed service required) so the full eval suite can be run repeatedly at no cost.
 
 ## Options Considered
 

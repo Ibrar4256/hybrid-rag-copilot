@@ -1,4 +1,4 @@
-# ADR-006: LLM Synthesis with Citations for Research Copilot
+# ADR-006: LLM Synthesis with Citations for Hybrid RAG Copilot
 
 ## Context
 Once the agentic loop (ADR-005) retrieves and reranks chunks, the LLM must synthesize an answer where every claim is traceable to a source chunk, and hallucinated or uncited claims are flagged or suppressed rather than silently included — an explicit project requirement, and the property the RAGAS faithfulness metric will later measure quantitatively.

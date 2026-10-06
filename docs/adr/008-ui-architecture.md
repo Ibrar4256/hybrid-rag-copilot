@@ -1,4 +1,4 @@
-# ADR-008: UI Architecture for Research Copilot
+# ADR-008: UI Architecture for Hybrid RAG Copilot
 
 ## Context
 Every prior interaction with this project has been CLI-only (`research_copilot.answer`). CLAUDE.md's original project scope calls for a "lightweight React/Next.js frontend" with "token-by-token streaming response with inline citation markers." No backend API layer exists yet either — the agent loop and citation synthesis are only reachable as direct Python function calls, not over HTTP.

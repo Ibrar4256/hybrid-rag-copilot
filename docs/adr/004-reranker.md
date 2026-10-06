@@ -1,4 +1,4 @@
-# ADR-004: Reranker for Research Copilot
+# ADR-004: Reranker for Hybrid RAG Copilot
 
 ## Context
 Hybrid retrieval (ADR-001, dense + BM25 via Qdrant) returns a broad top-k candidate set by cosine/fusion score alone. CLAUDE.md explicitly requires a reranker step ("with a reranker, not just raw cosine similarity top-k") as the quality gate before candidates reach the LLM — this is the layer most responsible for context precision in the RAGAS eval harness. Reranking runs at query time (unlike Contextual Retrieval in ADR-003, which runs at ingestion time), so latency cost here directly affects user-facing response time.

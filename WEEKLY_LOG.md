@@ -1,6 +1,6 @@
 # Weekly Log
 
-## Week 1 — Research Copilot: retrieval walking skeleton
+## Week 1 — Hybrid RAG Copilot: retrieval walking skeleton
 
 **What shipped:**
 - ADR-001: Qdrant chosen as vector store (over pgvector, Weaviate, Pinecone, FAISS)

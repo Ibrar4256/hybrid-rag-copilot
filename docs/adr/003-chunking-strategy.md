@@ -1,4 +1,4 @@
-# ADR-003: Chunking Strategy for Research Copilot
+# ADR-003: Chunking Strategy for Hybrid RAG Copilot
 
 ## Context
 Chunking determines what gets embedded and retrieved, and is the most common source of RAG retrieval failure — too small loses meaning, too large dilutes relevance. This decision feeds directly into ADR-001 (Qdrant hybrid search operates on chunks) and ADR-002 (embedding model embeds chunks), and is measured quantitatively via the eval harness's context precision/recall scores. Per CLAUDE.md's "build incrementally" rule, we ship a walking-skeleton chunking approach first, then layer in upgrades measured against the golden eval set — not all five approaches at once.

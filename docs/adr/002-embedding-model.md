@@ -1,4 +1,4 @@
-# ADR-002: Embedding Model for Research Copilot
+# ADR-002: Embedding Model for Hybrid RAG Copilot
 
 ## Context
 Retrieval quality is bounded by embedding quality. This is a learning-focused project — we want unlimited free iteration during eval/chunking tuning, but also want to build a real production pattern: a provider-agnostic interface so swapping embedding backends is a config change, not a refactor (explicitly called for in the project's cost/architecture guidelines, alongside retry/backoff for free-tier rate limits).

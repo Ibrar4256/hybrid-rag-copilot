@@ -18,7 +18,7 @@ from research_copilot.answer import answer_question_structured
 from research_copilot.config import settings
 from research_copilot.telemetry import load_log
 
-app = FastAPI(title="Research Copilot API")
+app = FastAPI(title="Hybrid RAG Copilot API")
 
 WEB_DIR = Path(__file__).parent.parent.parent / "web"
 
